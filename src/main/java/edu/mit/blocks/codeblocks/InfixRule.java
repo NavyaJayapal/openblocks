@@ -7,7 +7,7 @@ import edu.mit.blocks.workspace.WorkspaceListener;
  * <code>InfixRule</code> specifies a rule for <code>Block</code> linking.
  * Allows users to insert infix blocks in between two blocks.
  */
-public class InfixRule implements LinkRule, WorkspaceListener {
+public class InfixRule extends Mandate implements WorkspaceListener {
 
     /**
      * Returns true if the two sockets of the two blocks can link; false if not
@@ -73,25 +73,21 @@ public class InfixRule implements LinkRule, WorkspaceListener {
         return false;
     }
 
-    public boolean isMandatory() {
-        return false;
-    }
-
-    public void workspaceEventOccurred(WorkspaceEvent e) {
-        if (e.getEventType() == WorkspaceEvent.BLOCKS_CONNECTED) {
-            BlockLink link = e.getSourceLink();
+    public void workspaceEventOccurred(WorkspaceEvent workspaceEvent) {
+        if (workspaceEvent.getEventType() == WorkspaceEvent.BLOCKS_CONNECTED) {
+            BlockLink link = workspaceEvent.getSourceLink();
             if (link == null) {
                 return;
             }
-            Block oldchild = e.getWorkspace().getEnv().getBlock(link.getLastBlockID());
+            Block oldchild = workspaceEvent.getWorkspace().getEnv().getBlock(link.getLastBlockID());
             if (invalidBlock(oldchild)) {
                 return;
             }
-            Block newchild = e.getWorkspace().getEnv().getBlock(link.getPlugBlockID());
+            Block newchild = workspaceEvent.getWorkspace().getEnv().getBlock(link.getPlugBlockID());
             if (invalidBlock(newchild)) {
                 return;
             }
-            Block parent = e.getWorkspace().getEnv().getBlock(link.getSocketBlockID());
+            Block parent = workspaceEvent.getWorkspace().getEnv().getBlock(link.getSocketBlockID());
             if (invalidBlock(parent)) {
                 return;
             }
@@ -101,7 +97,7 @@ public class InfixRule implements LinkRule, WorkspaceListener {
             if (!newchild.hasPlug()) {
                 return;
             }
-            Block newChildPlug = e.getWorkspace().getEnv().getBlock(newchild.getPlug().getBlockID());
+            Block newChildPlug = workspaceEvent.getWorkspace().getEnv().getBlock(newchild.getPlug().getBlockID());
             if (invalidBlock(newChildPlug)) {
                 return;
             }
@@ -117,7 +113,7 @@ public class InfixRule implements LinkRule, WorkspaceListener {
                 return;
             }
             BlockLink link2 = BlockLink.getBlockLink(
-                    e.getWorkspace(),
+                    workspaceEvent.getWorkspace(),
                     newchild,
                     oldchild,
                     newchild.getSocketAt(0),
